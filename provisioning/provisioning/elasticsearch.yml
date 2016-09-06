@@ -1,0 +1,28 @@
+---
+- hosts: elasticsearch
+  tasks:
+    - name: Fetch the Elasticsearch signing key
+      become: yes
+      apt_key: url='https://packages.elastic.co/GPG-KEY-elasticsearch'
+
+    - name: Add the Elasticsearch repository
+      become: yes
+      apt_repository: repo='deb https://packages.elastic.co/elasticsearch/2.x/debian stable main'
+
+    - name: Update the cache
+      become: yes
+      apt: update_cache=yes
+
+    - name: Install the necessary packages
+      become: yes
+      apt: name='{{item}}' state=present
+      with_items:
+        - openjdk-8-jre
+        - elasticsearch
+      notify:
+        - restart elasticsearch
+
+  handlers:
+    - name: restart elasticsearch
+      become: yes
+      service: name=elasticsearch state=restarted

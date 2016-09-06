@@ -1,0 +1,51 @@
+---
+- hosts: rabbitmq
+  vars:
+    - rabbitmq_users:
+      - username: developer
+        password: repoleved
+  tasks:
+    - name: Add the RabbitmQ Apt Signing Key
+      become: yes
+      apt_key: url='https://www.rabbitmq.com/rabbitmq-release-signing-key.asc' state=present
+
+    - name: Add the RabbitMQ Apt Repository
+      become: yes
+      apt_repository: repo='deb http://www.rabbitmq.com/debian/ testing main' state=present
+
+    - name: Update the Ubuntu Apt Repository
+      become: yes
+      apt: update_cache=yes
+
+    - name: Install RabbitMQ
+      become: yes
+      apt: name='rabbitmq-server' state=present
+
+    - name: Install the RabbitMQ config file
+      become: yes
+      template: src='{{item.src}}' dest='{{item.dest}}'
+      with_items:
+        - src:  templates/etc/default/rabbitmq-server
+          dest: /etc/default/rabbitmq-server
+        - src:  templates/etc/rabbitmq/rabbitmq.config
+          dest: /etc/rabbitmq/rabbitmq.config
+      notify:
+        - restart rabbitmq
+
+    - name: Capture the RabbitMQ users
+      become: yes
+      command: rabbitmqctl list_users
+      register: rabbitmq_users
+
+    - name: Add a user for connecting to RabbitMQ
+      become: yes
+      rabbitmq_user: user='developer' password='repoleved' vhost='/' configure_priv='.*' read_priv='.*' write_priv='.*' state='present'
+
+    - name: Disable the guest account by deleting it
+      become: yes
+      rabbitmq_user: user='guest' state='absent'
+
+  handlers:
+    - name: restart rabbitmq
+      become: yes
+      service: name=rabbitmq-server state=restarted
