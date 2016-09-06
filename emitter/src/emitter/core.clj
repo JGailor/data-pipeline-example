@@ -11,7 +11,7 @@
   [& args]
   (let [conn (rmq/connect {:host "192.168.33.33" :username "developer" :password "repoleved"})
         channel (rch/open conn)
-        qname "gracenote.data.video"]
+        qname "pipeline.data.video"]
     (rq/declare channel qname {:exclusive false :auto-delete true})
     (println "[Starting emission]")
     (loop [id 1]

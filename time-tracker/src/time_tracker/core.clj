@@ -28,8 +28,8 @@
   (with-open [w (clojure.java.io/writer "dump.out")]
     (let [conn (rmq/connect  {:host "192.168.33.33" :username "developer" :password "repoleved"})
           rmqch (rch/open conn)
-          qname "gracenote.data.video"
-          handler (partial video-message-handler rmqch "gracenote.data.video.timestamped" w)]
+          qname "pipeline.data.video"
+          handler (partial video-message-handler rmqch "pipeline.data.video.timestamped" w)]
       (rq/declare rmqch qname {:exclusive false :auto-delete true})
       (rc/subscribe rmqch qname handler {:auto-ack true})
       (println "Waiting for messages...")

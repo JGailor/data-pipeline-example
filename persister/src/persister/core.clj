@@ -37,7 +37,7 @@
   (with-open [w (clojure.java.io/writer "stuff.txt")]
     (let [conn (rmq/connect {:host "192.168.33.33" :username "developer" :password "repoleved"})
           channel (rch/open conn)
-          qname "gracenote.data.video.timestamped"
+          qname "pipeline.data.video.timestamped"
           handler (partial message-handler w)]
       (rq/declare channel qname {:exclusive false :auto-delete true})
       (rc/subscribe channel qname handler {:auto-ack true})
